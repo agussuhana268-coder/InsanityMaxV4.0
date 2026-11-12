@@ -761,6 +761,21 @@ readInfo();buildFeats();applyLanguage(LANG);
       platform:getPlatform()
     };
   }
+  function licenseErrorText(err){
+    var code=String(err&&err.code||'').toLowerCase();
+    if(code==='license_revoked'||code==='revoked'||code==='inactive')return trText('LISENSI DICABUT');
+    if(code==='license_expired'||code==='expired')return trText('LISENSI KEDALUWARSA');
+    if(code==='license_invalid'||code==='invalid_license'||code==='key_not_found')return trText('INVALID OR INACTIVE LICENSE');
+    if(code==='device_mismatch'||code==='device_bound')return trText('LICENSE LOCKED TO ANOTHER DEVICE');
+    if(code==='invalid_input')return trText('INVALID LICENSE OR DEVICE DATA');
+    if(err&&err.status===429)return trText('TOO MANY ATTEMPTS — TRY AGAIN LATER');
+    return trText('SERVER CONNECTION ERROR');
+  }
+  function showLicenseError(err){
+    var fb=gi('fb');
+    if(fb){fb.textContent=licenseErrorText(err);fb.className='fb no';}
+    if(window.toast)window.toast(licenseErrorText(err),'e',3500);
+  }
   function stopHeartbeat(){
     if(heartbeatTimer){ clearInterval(heartbeatTimer); heartbeatTimer=null; }
   }
@@ -773,9 +788,8 @@ readInfo();buildFeats();applyLanguage(LANG);
         if(err.status === 403){
           stopHeartbeat();
           localStorage.removeItem(SESSION_KEY);
-          var licenseStatus=err.code==='license_revoked'?'LISENSI DICABUT':(err.code==='license_expired'?'LISENSI KEDALUWARSA':'INVALID OR INACTIVE LICENSE');
-          if(window.toast) window.toast(trText(licenseStatus),'e',3500);
           showLogin();
+          showLicenseError(err);
         } else if(window.toast) {
           window.toast(trText('KONEKSI SERVER TERGANGGU — MENCOBA LAGI'),'e',2500);
         }
@@ -812,8 +826,11 @@ readInfo();buildFeats();applyLanguage(LANG);
     } catch(err) {
       if(err.status === 403 || err.status === 400){
         localStorage.removeItem(SESSION_KEY);
+        showLogin();
+        showLicenseError(err);
+      } else {
+        showLogin();
       }
-      showLogin();
     }
   };
 
@@ -846,14 +863,10 @@ readInfo();buildFeats();applyLanguage(LANG);
     } catch(err) {
       if(typeof SFX!=='undefined') SFX.fail();
       var messages={
-        license_revoked:'LISENSI DICABUT',
-        license_expired:'LISENSI KEDALUWARSA',
-        license_invalid:'INVALID OR INACTIVE LICENSE',
-        device_mismatch:'LICENSE LOCKED TO ANOTHER DEVICE',
-        invalid_input:'INVALID LICENSE OR DEVICE DATA',
-        session_update_failed:'SESSION COULD NOT BE SAVED'
+        session_update_failed:'SESSION COULD NOT BE SAVED',
+        license_status_update_failed:'SESSION COULD NOT BE SAVED'
       };
-      fb.textContent=trText(messages[err.code] || (err.status===429 ? 'TOO MANY ATTEMPTS — TRY AGAIN LATER' : 'SERVER CONNECTION ERROR'));
+      fb.textContent=messages[err.code]?trText(messages[err.code]):licenseErrorText(err);
       fb.className='fb no';
       if(window.toast) window.toast(fb.textContent,'e',3000);
       btn.disabled=false;
