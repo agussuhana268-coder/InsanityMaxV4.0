@@ -137,16 +137,24 @@ button{font-family:inherit;-webkit-appearance:none;appearance:none}
 .tab.on{color:var(--red)}
 .tab.on svg{transform:translateY(-1px) scale(1.1);filter:drop-shadow(0 0 8px rgba(255,45,58,.55))}
 
-/* language selector */
-.lang-card{margin-top:18px;margin-bottom:8px;padding:17px;border-radius:22px;background:linear-gradient(145deg,rgba(38,38,50,.88),rgba(18,18,26,.9));border:1px solid rgba(255,255,255,.09);box-shadow:0 14px 34px rgba(0,0,0,.22)}
-.lang-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.lang-globe{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(255,45,58,.22),rgba(255,255,255,.05));border:1px solid rgba(255,70,80,.2);font-size:23px}
-.lang-title{font-size:16px;font-weight:700}.lang-desc{margin-top:3px;font-size:12px;color:var(--tx2)}
-.lang-options{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.lang-option{display:flex;align-items:center;gap:9px;min-height:48px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);color:var(--tx);font:600 13px var(--sans);text-align:left;cursor:pointer;transition:all .2s}
-.lang-option .flag{font-size:19px}.lang-option .check{margin-left:auto;color:var(--ok);opacity:0}
-.lang-option.active{background:rgba(255,45,58,.12);border-color:rgba(255,65,75,.55);box-shadow:inset 0 0 0 1px rgba(255,45,58,.12)}
-.lang-option.active .check{opacity:1}
+/* native-style language preference row */
+.lang-card{margin-top:14px;margin-bottom:8px;border-radius:22px;background:var(--sf);border:1px solid var(--ln);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);overflow:hidden}
+.lang-trigger{width:100%;display:flex;align-items:center;gap:14px;padding:15px 16px;background:transparent;border:0;color:var(--tx);text-align:left;cursor:pointer}
+.lang-trigger:active{background:rgba(255,255,255,.05)}
+.lang-globe{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;background:rgba(255,255,255,.07)}
+.lang-globe svg{width:23px;height:23px;stroke:var(--tx);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.lang-main{flex:1;min-width:0}.lang-title{font-size:16px;font-weight:600;letter-spacing:-.2px}.lang-desc{margin-top:3px;font-size:12.5px;color:var(--tx2)}
+.lang-current{font-size:14px;color:var(--tx2);font-weight:500;white-space:nowrap}
+.lang-chevron{width:18px;height:18px;stroke:var(--tx3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .22s}
+.lang-card.open .lang-chevron{transform:rotate(90deg)}
+.lang-options{display:none;border-top:1px solid var(--ln);padding:4px 0}
+.lang-card.open .lang-options{display:block}
+.lang-option{width:100%;display:flex;align-items:center;gap:14px;min-height:49px;padding:11px 18px 11px 72px;background:transparent;border:0;color:var(--tx);font:500 14px var(--sans);text-align:left;cursor:pointer;position:relative}
+.lang-option+.lang-option:before{content:'';position:absolute;top:0;left:72px;right:0;height:1px;background:var(--ln)}
+.lang-option:active{background:rgba(255,255,255,.05)}
+.lang-option .lang-check{margin-left:auto;width:18px;height:18px;stroke:var(--red);fill:none;stroke-width:2.4;opacity:0}
+.lang-option.active{color:var(--red);font-weight:650}
+.lang-option.active .lang-check{opacity:1}
 
 /* device page */
 .stage{position:relative;margin-top:14px;height:432px;display:grid;place-items:center}
@@ -313,16 +321,18 @@ button{font-family:inherit;-webkit-appearance:none;appearance:none}
       <div class="grp">Spesifikasi</div>
       <div class="lst" id="spec"></div>
       <p class="note" id="specNote"></p>
-      <div class="lang-card">
-        <div class="lang-head">
-          <div class="lang-globe" aria-hidden="true">🌐</div>
-          <div><div class="lang-title" data-i18n="Bahasa">Bahasa</div><div class="lang-desc" data-i18n="Pilih bahasa tampilan aplikasi">Pilih bahasa tampilan aplikasi</div></div>
-        </div>
-        <div class="lang-options" role="group" aria-label="Language">
-          <button class="lang-option" type="button" data-lang="id"><span class="flag">🇮🇩</span><span>Indonesia</span><span class="check">✓</span></button>
-          <button class="lang-option" type="button" data-lang="en"><span class="flag">🇺🇸</span><span>English</span><span class="check">✓</span></button>
-          <button class="lang-option" type="button" data-lang="es"><span class="flag">🇪🇸</span><span>Español</span><span class="check">✓</span></button>
-          <button class="lang-option" type="button" data-lang="pt"><span class="flag">🇧🇷</span><span>Português</span><span class="check">✓</span></button>
+      <div class="lang-card" id="languageCard">
+        <button class="lang-trigger" id="languageTrigger" type="button" aria-expanded="false" aria-controls="languageOptions">
+          <span class="lang-globe" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"></path></svg></span>
+          <span class="lang-main"><span class="lang-title" data-i18n="Bahasa">Bahasa</span><span class="lang-desc" data-i18n="Pilih bahasa tampilan aplikasi">Pilih bahasa tampilan aplikasi</span></span>
+          <span class="lang-current" id="languageCurrent">Indonesia</span>
+          <svg class="lang-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+        </button>
+        <div class="lang-options" id="languageOptions" role="group" aria-label="Language">
+          <button class="lang-option" type="button" data-lang="id">Indonesia<svg class="lang-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg></button>
+          <button class="lang-option" type="button" data-lang="en">English<svg class="lang-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg></button>
+          <button class="lang-option" type="button" data-lang="es">Español<svg class="lang-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg></button>
+          <button class="lang-option" type="button" data-lang="pt">Português<svg class="lang-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg></button>
         </div>
       </div>
     </section>
@@ -628,13 +638,16 @@ function applyLanguage(lang){
  var walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),nodes=[],n;
  while((n=walker.nextNode())){if(n.parentElement&&n.parentElement.closest('.lang-options'))continue;var raw=n.nodeValue.trim();if(raw){var translated=trText(raw);if(translated!==raw)n.nodeValue=n.nodeValue.replace(raw,translated);}}
  document.querySelectorAll('.lang-option').forEach(function(b){var active=b.dataset.lang===LANG;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active?'true':'false');});
+ var current=document.getElementById('languageCurrent');if(current)current.textContent=({id:'Indonesia',en:'English',es:'Español',pt:'Português'})[LANG];
  if(typeof buildFeats==='function')buildFeats();
  if(typeof readInfo==='function')readInfo();
  if(typeof refresh==='function')refresh();
  if(typeof pick==='function'&&sel)pick(sel);
 }
 window.applyLanguage=applyLanguage;
-document.querySelectorAll('.lang-option').forEach(function(b){b.addEventListener('click',function(){applyLanguage(b.dataset.lang);if(window.toast)toast(({id:'Bahasa diubah',en:'Language changed',es:'Idioma cambiado',pt:'Idioma alterado'})[LANG],'s');});});
+var languageCard=document.getElementById('languageCard'),languageTrigger=document.getElementById('languageTrigger');
+if(languageTrigger)languageTrigger.addEventListener('click',function(){var opened=languageCard.classList.toggle('open');languageTrigger.setAttribute('aria-expanded',opened?'true':'false');});
+document.querySelectorAll('.lang-option').forEach(function(b){b.addEventListener('click',function(){applyLanguage(b.dataset.lang);languageCard.classList.remove('open');languageTrigger.setAttribute('aria-expanded','false');if(window.toast)toast(({id:'Bahasa diubah',en:'Language changed',es:'Idioma cambiado',pt:'Idioma alterado'})[LANG],'s');});});
 try{LANG=localStorage.getItem(LANG_KEY)||'id';}catch(e){LANG='id';}
 
 /* device info (real-time) */
