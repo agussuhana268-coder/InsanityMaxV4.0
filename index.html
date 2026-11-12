@@ -1577,197 +1577,164 @@ function runInject(){
 })();
 </script>
 
-<!-- ══════ FIREBASE COMPAT SDK ══════ -->
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<!-- ══════ FIREBASE KEY SYSTEM ══════ -->
+<!-- INSANITYMAX iOS/WEB — Railway + Supabase license API -->
 <script>
 (function(){
-  /* ── Init ── */
-  var FB={
-    apiKey:"AIzaSyB2EZgrbnslC1tuyC0WtbIkA4SfJe5m2As",
-    authDomain:"mdzzxiters-panel-30d5a.firebaseapp.com",
-    projectId:"mdzzxiters-panel-30d5a",
-    storageBucket:"mdzzxiters-panel-30d5a.firebasestorage.app",
-    messagingSenderId:"515480722704",
-    appId:"1:515480722704:web:225d9105e3fea021125995"
-  };
-  firebase.initializeApp(FB);
-  var db=firebase.firestore();
-  firebase.auth().signInAnonymously().catch(function(){});
+  'use strict';
+  var API_BASE = 'https://mdzzxiters-api.agussuhana268.workers.dev';
+  var SESSION_KEY = '_mdz_sess';
+  var DEVICE_KEY = '_mdz_did';
+  var heartbeatTimer = null;
 
-  /* ── Device ID ── */
-  function getDevId(){
-    var id=localStorage.getItem('_mdz_did');
-    if(!id){id='dev_'+Date.now().toString(36)+'_'+Math.random().toString(36).substr(2,8);localStorage.setItem('_mdz_did',id);}
+  function gi(id){ return document.getElementById(id); }
+  function readSession(){
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }
+    catch (_) { return null; }
+  }
+  function getDeviceId(){
+    var id = localStorage.getItem(DEVICE_KEY);
+    if(!id){
+      var random = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID().replace(/-/g,'')
+        : Date.now().toString(36) + Math.random().toString(36).slice(2);
+      id = 'im_ios_' + random;
+      localStorage.setItem(DEVICE_KEY,id);
+    }
     return id;
   }
   function getPlatform(){
-    var ua=navigator.userAgent;
-    if(/iPad|iPhone|iPod/.test(ua))return'iOS';
-    if(/Android/.test(ua))return'Android';
-    return'Browser';
+    return /iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'insanitymax_ios' : 'insanitymax_web';
   }
-
-  /* ── Heartbeat every 30s ── */
-  var _hb=null;
-  function startHB(did){
-    if(_hb)clearInterval(_hb);
-    _hb=setInterval(function(){
-      db.collection('sessions').doc(did).set({
-        online:true,
-        lastSeen:firebase.firestore.FieldValue.serverTimestamp()
-      },{merge:true}).catch(function(){});
-    },30000);
-  }
-
-  /* ── Set offline on tab close ── */
-  window.addEventListener('beforeunload',function(){
-    var s=JSON.parse(localStorage.getItem('_mdz_sess')||'null');
-    if(s&&s.did){
-      db.collection('sessions').doc(s.did).set({
-        online:false,
-        lastSeen:firebase.firestore.FieldValue.serverTimestamp()
-      },{merge:true}).catch(function(){});
+  async function postApi(path, payload){
+    var response = await fetch(API_BASE + path, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      cache:'no-store',
+      body:JSON.stringify(payload)
+    });
+    var data = {};
+    try { data = await response.json(); } catch (_) {}
+    if(!response.ok){
+      var err = new Error(data.code || data.message || 'api_request_failed');
+      err.status = response.status;
+      err.code = data.code || '';
+      throw err;
     }
-  });
+    return data;
+  }
+  function sessionPayload(session){
+    return {
+      key:session.key,
+      device_id:session.did,
+      platform:getPlatform()
+    };
+  }
+  function stopHeartbeat(){
+    if(heartbeatTimer){ clearInterval(heartbeatTimer); heartbeatTimer=null; }
+  }
+  function startHeartbeat(session){
+    stopHeartbeat();
+    heartbeatTimer = setInterval(async function(){
+      try {
+        await postApi('/api/licenses/heartbeat',sessionPayload(session));
+      } catch(err) {
+        if(err.status === 403){
+          stopHeartbeat();
+          localStorage.removeItem(SESSION_KEY);
+          if(window.toast) window.toast('LISENSI TIDAK AKTIF — SILAKAN LOGIN ULANG','e',3500);
+          showLogin();
+        } else if(window.toast) {
+          window.toast('KONEKSI SERVER TERGANGGU — MENCOBA LAGI','e',2500);
+        }
+      }
+    },60000);
+  }
+  function showLogin(){
+    var sp=gi('sp'),lg=gi('lg'),mp=gi('mp');
+    if(mp) mp.classList.remove('on');
+    if(sp) sp.classList.remove('on','out');
+    if(lg) lg.classList.add('on');
+  }
+  function showPanel(){
+    var sp=gi('sp'),lg=gi('lg'),mp=gi('mp');
+    if(sp) sp.classList.add('out');
+    setTimeout(function(){
+      if(sp) sp.classList.remove('on','out');
+      if(lg) lg.classList.remove('on','out');
+      if(mp) mp.classList.add('on');
+      if(window.buildFeats) window.buildFeats();
+    },380);
+  }
 
-  /* ── Helper: shortcut to getElementById ── */
-  function gi(id){return document.getElementById(id);}
-
-  /* ── After splash: check saved session ── */
-  window._fbAfterSplash=function(){
-    var s=JSON.parse(localStorage.getItem('_mdz_sess')||'null');
-    if(!s||!s.did||!s.keyId){
-      /* no saved session → show login */
-      var sp=gi('sp'),lg=gi('lg');
-      sp.classList.add('out');
-      setTimeout(function(){sp.classList.remove('on','out');lg.classList.add('on');},380);
+  window._fbAfterSplash = async function(){
+    var session=readSession();
+    if(!session || !session.key || !session.did){
+      showLogin();
       return;
     }
-    /* validate saved key still active & same device */
-    db.collection('keys').doc(s.keyId).get().then(function(snap){
-      if(snap.exists&&snap.data().active&&snap.data().deviceId===s.did){
-        /* still valid — go straight to panel */
-        db.collection('sessions').doc(s.did).set({
-          online:true,lastSeen:firebase.firestore.FieldValue.serverTimestamp()
-        },{merge:true}).catch(function(){});
-        startHB(s.did);
-        var sp=gi('sp'),mp=gi('mp');
-        sp.classList.add('out');
-        setTimeout(function(){
-          sp.classList.remove('on','out');
-          mp.classList.add('on');
-          if(window.buildFeats)window.buildFeats();
-        },380);
-      }else{
-        localStorage.removeItem('_mdz_sess');
-        var sp=gi('sp'),lg=gi('lg');
-        sp.classList.add('out');
-        setTimeout(function(){sp.classList.remove('on','out');lg.classList.add('on');},380);
+    try {
+      await postApi('/api/licenses/heartbeat',sessionPayload(session));
+      startHeartbeat(session);
+      showPanel();
+    } catch(err) {
+      if(err.status === 403 || err.status === 400){
+        localStorage.removeItem(SESSION_KEY);
       }
-    }).catch(function(){
-      /* offline or error — show login */
-      var sp=gi('sp'),lg=gi('lg');
-      sp.classList.add('out');
-      setTimeout(function(){sp.classList.remove('on','out');lg.classList.add('on');},380);
-    });
+      showLogin();
+    }
   };
 
-  /* ── Override doLogin with Firebase version ── */
-  window.doLogin=function(){
-    if(typeof ensureAudio==='function')ensureAudio();
+  window.doLogin = async function(){
+    if(typeof ensureAudio==='function') ensureAudio();
     var raw=gi('kinp').value.trim().toUpperCase();
     var fb=gi('fb'),btn=gi('vfybtn'),bt=gi('vfyt');
-    btn.disabled=true;bt.textContent='VERIFYING...';
-    fb.className='fb hidden';
-
-    if(!raw||raw.length<6){
+    if(!raw || raw.length < 6){
       fb.textContent='INVALID KEY FORMAT';
       fb.className='fb no';
-      btn.disabled=false;bt.textContent='VERIFY KEY';
       return;
     }
-
-    var did=getDevId();
-
-    db.collection('keys')
-      .where('key','==',raw)
-      .where('active','==',true)
-      .get()
-      .then(function(snap){
-        if(snap.empty){
-          /* key not found */
-          if(typeof SFX!=='undefined')SFX.fail();
-          fb.textContent='INVALID KEY — ACCESS DENIED';
-          fb.className='fb no';
-          gi('kinp').style.cssText='border-color:#e01212;box-shadow:0 0 0 3px rgba(224,18,18,.18)';
-          if(window.toast)window.toast('WRONG KEY — TRY AGAIN','e');
-          setTimeout(function(){gi('kinp').style.cssText='';},1600);
-          btn.disabled=false;bt.textContent='VERIFY KEY';
-          return;
-        }
-
-        var keyDoc=snap.docs[0];
-        var kd=keyDoc.data();
-
-        /* check device lock */
-        if(kd.used&&kd.deviceId&&kd.deviceId!==did){
-          if(typeof SFX!=='undefined')SFX.fail();
-          fb.textContent='KEY ALREADY USED ON ANOTHER DEVICE';
-          fb.className='fb no';
-          if(window.toast)window.toast('KEY LOCKED TO OTHER DEVICE','e',3000);
-          btn.disabled=false;bt.textContent='VERIFY KEY';
-          return;
-        }
-
-        /* claim key & create session */
-        keyDoc.ref.update({
-          used:true,
-          deviceId:did,
-          usedAt:firebase.firestore.FieldValue.serverTimestamp(),
-          lastSeen:firebase.firestore.FieldValue.serverTimestamp()
-        }).then(function(){
-          return db.collection('sessions').doc(did).set({
-            key:raw,
-            keyId:keyDoc.id,
-            deviceId:did,
-            online:true,
-            platform:getPlatform(),
-            ua:navigator.userAgent.substring(0,120),
-            lastSeen:firebase.firestore.FieldValue.serverTimestamp(),
-            createdAt:firebase.firestore.FieldValue.serverTimestamp()
-          },{merge:true});
-        }).then(function(){
-          localStorage.setItem('_mdz_sess',JSON.stringify({
-            key:raw,keyId:keyDoc.id,did:did
-          }));
-          startHB(did);
-          if(typeof SFX!=='undefined')SFX.ok();
-          fb.textContent='ACCESS GRANTED — WELCOME BACK';
-          fb.className='fb ok';
-          if(window.toast)window.toast('ACCESS GRANTED','s',1800);
-          setTimeout(function(){
-            var lg=gi('lg'),mp=gi('mp');
-            lg.classList.add('out');
-            setTimeout(function(){
-              lg.classList.remove('on','out');
-              mp.classList.add('on');
-              if(window.buildFeats)window.buildFeats();
-            },380);
-          },1100);
-        });
-      })
-      .catch(function(err){
-        console.error(err);
-        fb.textContent='CONNECTION ERROR — CHECK INTERNET';
-        fb.className='fb no';
-        if(window.toast)window.toast('CONNECTION ERROR','e');
-        btn.disabled=false;bt.textContent='VERIFY KEY';
+    btn.disabled=true;
+    bt.textContent='VERIFYING...';
+    fb.className='fb hidden';
+    var session={key:raw,did:getDeviceId()};
+    try {
+      await postApi('/api/licenses/session',{
+        key:session.key,
+        device_id:session.did,
+        platform:getPlatform()
       });
+      localStorage.setItem(SESSION_KEY,JSON.stringify(session));
+      startHeartbeat(session);
+      if(typeof SFX!=='undefined') SFX.ok();
+      fb.textContent='ACCESS GRANTED — LICENSE VERIFIED';
+      fb.className='fb ok';
+      if(window.toast) window.toast('ACCESS GRANTED','s',1800);
+      setTimeout(showPanel,700);
+    } catch(err) {
+      if(typeof SFX!=='undefined') SFX.fail();
+      var messages={
+        license_invalid:'INVALID OR INACTIVE LICENSE',
+        device_mismatch:'LICENSE LOCKED TO ANOTHER DEVICE',
+        invalid_input:'INVALID LICENSE OR DEVICE DATA',
+        session_update_failed:'SESSION COULD NOT BE SAVED'
+      };
+      fb.textContent=messages[err.code] || (err.status===429 ? 'TOO MANY ATTEMPTS — TRY AGAIN LATER' : 'SERVER CONNECTION ERROR');
+      fb.className='fb no';
+      if(window.toast) window.toast(fb.textContent,'e',3000);
+      btn.disabled=false;
+      bt.textContent='VERIFY KEY';
+    }
   };
 
+  window.addEventListener('pagehide',stopHeartbeat);
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible'){
+      var session=readSession();
+      if(session && session.key && session.did){
+        postApi('/api/licenses/heartbeat',sessionPayload(session)).catch(function(){});
+      }
+    }
+  });
 })();
 </script>
 </body>
