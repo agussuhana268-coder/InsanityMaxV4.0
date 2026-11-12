@@ -274,7 +274,7 @@ button{font-family:inherit;-webkit-appearance:none;appearance:none}
 
     <section class="pg" id="pg-perf">
       <h1 class="ttl">Performa</h1>
-      <p class="sub">Bikin game lebih ringan dan stabil di perangkatmu.</p>
+      <p class="sub">Optimasi game lebih ringan dan stabil di perangkatmu.</p>
       <div class="grp">Optimasi <span id="cntPerf">0 aktif</span></div>
       <div class="lst" id="list-perf"></div>
     </section>
@@ -619,7 +619,7 @@ function readInfo(){
   var n=new Date();
   gi('pClk').textContent=('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2);
   gi('pDt').textContent=n.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'});
-  gi('specNote').textContent=(isIP||isPad)&&!navigator.deviceMemory?'Safari tidak membagikan nama model dan RAM secara pasti. Model dan RAM dicocokkan dari ukuran layar, jadi bisa berupa beberapa kemungkinan.':'';
+  gi('specNote').textContent=(isIP||isPad)&&!navigator.deviceMemory?'Spesifikasi tidak selalu akurat 100%. Status yang ditampilkan bisa saja meleset! Jangan jadikan acuan.':'';
 }
 detect();
 if(navigator.getBattery)navigator.getBattery().then(function(b){bat=b;}).catch(function(){});
