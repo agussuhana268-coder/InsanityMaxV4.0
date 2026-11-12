@@ -137,6 +137,17 @@ button{font-family:inherit;-webkit-appearance:none;appearance:none}
 .tab.on{color:var(--red)}
 .tab.on svg{transform:translateY(-1px) scale(1.1);filter:drop-shadow(0 0 8px rgba(255,45,58,.55))}
 
+/* language selector */
+.lang-card{margin-top:18px;margin-bottom:8px;padding:17px;border-radius:22px;background:linear-gradient(145deg,rgba(38,38,50,.88),rgba(18,18,26,.9));border:1px solid rgba(255,255,255,.09);box-shadow:0 14px 34px rgba(0,0,0,.22)}
+.lang-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.lang-globe{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,rgba(255,45,58,.22),rgba(255,255,255,.05));border:1px solid rgba(255,70,80,.2);font-size:23px}
+.lang-title{font-size:16px;font-weight:700}.lang-desc{margin-top:3px;font-size:12px;color:var(--tx2)}
+.lang-options{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.lang-option{display:flex;align-items:center;gap:9px;min-height:48px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);color:var(--tx);font:600 13px var(--sans);text-align:left;cursor:pointer;transition:all .2s}
+.lang-option .flag{font-size:19px}.lang-option .check{margin-left:auto;color:var(--ok);opacity:0}
+.lang-option.active{background:rgba(255,45,58,.12);border-color:rgba(255,65,75,.55);box-shadow:inset 0 0 0 1px rgba(255,45,58,.12)}
+.lang-option.active .check{opacity:1}
+
 /* device page */
 .stage{position:relative;margin-top:14px;height:432px;display:grid;place-items:center}
 .stage::before{content:'';position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,45,58,.3),transparent 68%);filter:blur(10px)}
@@ -302,6 +313,18 @@ button{font-family:inherit;-webkit-appearance:none;appearance:none}
       <div class="grp">Spesifikasi</div>
       <div class="lst" id="spec"></div>
       <p class="note" id="specNote"></p>
+      <div class="lang-card">
+        <div class="lang-head">
+          <div class="lang-globe" aria-hidden="true">🌐</div>
+          <div><div class="lang-title" data-i18n="Bahasa">Bahasa</div><div class="lang-desc" data-i18n="Pilih bahasa tampilan aplikasi">Pilih bahasa tampilan aplikasi</div></div>
+        </div>
+        <div class="lang-options" role="group" aria-label="Language">
+          <button class="lang-option" type="button" data-lang="id"><span class="flag">🇮🇩</span><span>Indonesia</span><span class="check">✓</span></button>
+          <button class="lang-option" type="button" data-lang="en"><span class="flag">🇺🇸</span><span>English</span><span class="check">✓</span></button>
+          <button class="lang-option" type="button" data-lang="es"><span class="flag">🇪🇸</span><span>Español</span><span class="check">✓</span></button>
+          <button class="lang-option" type="button" data-lang="pt"><span class="flag">🇧🇷</span><span>Português</span><span class="check">✓</span></button>
+        </div>
+      </div>
     </section>
   </div>
 
@@ -494,7 +517,7 @@ function buildFeats(){
     FEATS.filter(function(f){return f.pg===pg;}).forEach(function(f){
       var r=document.createElement('div');r.className='row';
       r.innerHTML='<div class="rico" style="background:'+f.c+'"><svg viewBox="0 0 24 24"><use href="#i-'+f.ico+'"/></svg></div>'+
-        '<div class="rin"><div class="rn">'+f.name+'</div><div class="rd">'+f.desc+'</div></div>'+
+        '<div class="rin"><div class="rn">'+trText(f.name)+'</div><div class="rd">'+trText(f.desc)+'</div></div>'+
         '<label class="sw" onclick="event.stopPropagation()"><input type="checkbox"'+(f.on?' checked':'')+'><b></b></label>';
       var cb=r.querySelector('input');
       r.addEventListener('click',function(){cb.checked=!cb.checked;flip(f,cb.checked);});
@@ -512,7 +535,7 @@ function flip(f,v){
 }
 function refresh(){
   var a=active(),nf=a.filter(function(f){return f.pg==='feat';}).length,np=a.length-nf;
-  gi('cntFeat').textContent=nf+' aktif';gi('cntPerf').textContent=np+' aktif';
+  gi('cntFeat').textContent=nf+' '+trText('aktif');gi('cntPerf').textContent=np+' '+trText('aktif');
   gi('dkA').textContent=a.length+' fitur aktif';
   gi('dkB').textContent=sel?NAMES[sel]:'Pilih game dulu';
   gi('dock').classList.toggle('on',a.length>0);
@@ -520,7 +543,7 @@ function refresh(){
 function pick(k){
   sel=k;
   gi('btnFF').classList.toggle('sel',k==='FF');gi('btnFFMAX').classList.toggle('sel',k==='MX');
-  gi('tagFF').textContent=k==='FF'?'Dipilih':'Pilih';gi('tagFFMAX').textContent=k==='MX'?'Dipilih':'Pilih';
+  gi('tagFF').textContent=trText(k==='FF'?'Dipilih':'Pilih');gi('tagFFMAX').textContent=trText(k==='MX'?'Dipilih':'Pilih');
   refresh();
 }
 function launch(k,url){
@@ -577,6 +600,43 @@ function run(){
   })();
 }
 
+/* multilingual UI */
+var LANG_KEY='insanitymax_language';
+var LANG='id';
+var I18N={
+en:{
+'Fitur':'Features','Pilih game, lalu nyalakan fitur yang kamu mau.':'Choose a game, then enable the features you want.','Pilih':'Select','Dipilih':'Selected','Fitur aim':'Aim features','aktif':'active','Performa':'Performance','Optimasi game lebih ringan dan stabil di perangkatmu.':'Make gameplay lighter and more stable on your device.','Optimasi':'Optimization','Perangkat':'Device','Spesifikasi perangkat ini, diperbarui langsung.':'Device specifications, updated in real time.','Baterai':'Battery','Spesifikasi':'Specifications','Bahasa':'Language','Pilih bahasa tampilan aplikasi':'Choose the app display language','Info':'Info','Pilih game dulu':'Choose a game first','Inject':'Inject','Siap':'Ready','Berjalan':'Running','Selesai':'Completed','Batal':'Cancel','Buka':'Open','Belum ada fitur':'No features selected','Nyalakan minimal satu fitur dulu.':'Enable at least one feature first.','Pilih game':'Choose a game','Pilih Free Fire atau Free Fire Max dulu.':'Choose Free Fire or Free Fire Max first.','Mulai inject?':'Start process?','Tidak tersedia':'Not available','Online':'Online','Offline':'Offline','Potret':'Portrait','Lanskap':'Landscape','Refresh rate':'Refresh rate','Resolusi asli':'Native resolution','Jaringan':'Network','Prosesor':'Processor','Layar':'Screen','Memori JS':'JS memory','Zona waktu':'Time zone','Sistem':'System','RAM':'RAM','Perkiraan':'Estimated','Tidak diketahui':'Unknown','INVALID KEY FORMAT':'Invalid key format','VERIFYING...':'VERIFYING...','ACCESS GRANTED — LICENSE VERIFIED':'ACCESS GRANTED — LICENSE VERIFIED','ACCESS GRANTED':'ACCESS GRANTED','INVALID OR INACTIVE LICENSE':'INVALID OR INACTIVE LICENSE','LICENSE LOCKED TO ANOTHER DEVICE':'LICENSE LOCKED TO ANOTHER DEVICE','INVALID LICENSE OR DEVICE DATA':'INVALID LICENSE OR DEVICE DATA','SESSION COULD NOT BE SAVED':'SESSION COULD NOT BE SAVED','TOO MANY ATTEMPTS — TRY AGAIN LATER':'TOO MANY ATTEMPTS — TRY AGAIN LATER','SERVER CONNECTION ERROR':'SERVER CONNECTION ERROR','VERIFY KEY':'VERIFY KEY'
+},
+es:{
+'Fitur':'Funciones','Pilih game, lalu nyalakan fitur yang kamu mau.':'Elige un juego y activa las funciones que quieras.','Pilih':'Elegir','Dipilih':'Seleccionado','Fitur aim':'Funciones de apuntado','aktif':'activas','Performa':'Rendimiento','Optimasi game lebih ringan dan stabil di perangkatmu.':'Optimiza el juego para que funcione con más fluidez y estabilidad.','Optimasi':'Optimización','Perangkat':'Dispositivo','Spesifikasi perangkat ini, diperbarui langsung.':'Especificaciones del dispositivo, actualizadas en tiempo real.','Baterai':'Batería','Spesifikasi':'Especificaciones','Bahasa':'Idioma','Pilih bahasa tampilan aplikasi':'Elige el idioma de la aplicación','Info':'Información','Pilih game dulu':'Primero elige un juego','Inject':'Iniciar','Siap':'Listo','Berjalan':'En curso','Selesai':'Completado','Batal':'Cancelar','Buka':'Abrir','Belum ada fitur':'No hay funciones seleccionadas','Nyalakan minimal satu fitur dulu.':'Activa al menos una función primero.','Pilih game':'Elegir juego','Pilih Free Fire atau Free Fire Max dulu.':'Primero elige Free Fire o Free Fire Max.','Mulai inject?':'¿Iniciar el proceso?','Tidak tersedia':'No disponible','Online':'En línea','Offline':'Sin conexión','Potret':'Vertical','Lanskap':'Horizontal','Refresh rate':'Frecuencia de actualización','Resolusi asli':'Resolución nativa','Jaringan':'Red','Prosesor':'Procesador','Layar':'Pantalla','Memori JS':'Memoria JS','Zona waktu':'Zona horaria','Sistem':'Sistema','RAM':'RAM','Tidak diketahui':'Desconocido','INVALID KEY FORMAT':'Formato de clave no válido','VERIFYING...':'VERIFICANDO...','ACCESS GRANTED — LICENSE VERIFIED':'ACCESO PERMITIDO — LICENCIA VERIFICADA','ACCESS GRANTED':'ACCESO PERMITIDO','INVALID OR INACTIVE LICENSE':'LICENCIA NO VÁLIDA O INACTIVA','LICENSE LOCKED TO ANOTHER DEVICE':'LICENCIA VINCULADA A OTRO DISPOSITIVO','INVALID LICENSE OR DEVICE DATA':'LICENCIA O DATOS DEL DISPOSITIVO NO VÁLIDOS','SESSION COULD NOT BE SAVED':'NO SE PUDO GUARDAR LA SESIÓN','TOO MANY ATTEMPTS — TRY AGAIN LATER':'DEMASIADOS INTENTOS — INTÉNTALO MÁS TARDE','SERVER CONNECTION ERROR':'ERROR DE CONEXIÓN CON EL SERVIDOR','VERIFY KEY':'VERIFICAR CLAVE'
+},
+pt:{
+'Fitur':'Recursos','Pilih game, lalu nyalakan fitur yang kamu mau.':'Escolha um jogo e ative os recursos desejados.','Pilih':'Selecionar','Dipilih':'Selecionado','Fitur aim':'Recursos de mira','aktif':'ativos','Performa':'Desempenho','Optimasi game lebih ringan dan stabil di perangkatmu.':'Otimize o jogo para funcionar com mais leveza e estabilidade.','Optimasi':'Otimização','Perangkat':'Dispositivo','Spesifikasi perangkat ini, diperbarui langsung.':'Especificações do dispositivo, atualizadas em tempo real.','Baterai':'Bateria','Spesifikasi':'Especificações','Bahasa':'Idioma','Pilih bahasa tampilan aplikasi':'Escolha o idioma do aplicativo','Info':'Informações','Pilih game dulu':'Escolha um jogo primeiro','Inject':'Iniciar','Siap':'Pronto','Berjalan':'Em execução','Selesai':'Concluído','Batal':'Cancelar','Buka':'Abrir','Belum ada fitur':'Nenhum recurso selecionado','Nyalakan minimal satu fitur dulu.':'Ative pelo menos um recurso primeiro.','Pilih game':'Escolher jogo','Pilih Free Fire atau Free Fire Max dulu.':'Escolha Free Fire ou Free Fire Max primeiro.','Mulai inject?':'Iniciar processo?','Tidak tersedia':'Indisponível','Online':'Online','Offline':'Offline','Potret':'Retrato','Lanskap':'Paisagem','Refresh rate':'Taxa de atualização','Resolusi asli':'Resolução nativa','Jaringan':'Rede','Prosesor':'Processador','Layar':'Tela','Memori JS':'Memória JS','Zona waktu':'Fuso horário','Sistem':'Sistema','RAM':'RAM','Tidak diketahui':'Desconhecido','INVALID KEY FORMAT':'Formato de chave inválido','VERIFYING...':'VERIFICANDO...','ACCESS GRANTED — LICENSE VERIFIED':'ACESSO PERMITIDO — LICENÇA VERIFICADA','ACCESS GRANTED':'ACESSO PERMITIDO','INVALID OR INACTIVE LICENSE':'LICENÇA INVÁLIDA OU INATIVA','LICENSE LOCKED TO ANOTHER DEVICE':'LICENÇA VINCULADA A OUTRO DISPOSITIVO','INVALID LICENSE OR DEVICE DATA':'LICENÇA OU DADOS DO DISPOSITIVO INVÁLIDOS','SESSION COULD NOT BE SAVED':'NÃO FOI POSSÍVEL SALVAR A SESSÃO','TOO MANY ATTEMPTS — TRY AGAIN LATER':'MUITAS TENTATIVAS — TENTE MAIS TARDE','SERVER CONNECTION ERROR':'ERRO DE CONEXÃO COM O SERVIDOR','VERIFY KEY':'VERIFICAR CHAVE'
+}};
+function trText(value){
+ var s=String(value==null?'':value),map=I18N[LANG]||{};
+ if(map[s])return map[s];
+ var keys=Object.keys(I18N);
+ for(var i=0;i<keys.length;i++){var k=keys[i],rev=I18N[k];for(var id in rev)if(rev[id]===s&&map[id])return map[id];}
+ return s;
+}
+window.trText=trText;
+function applyLanguage(lang){
+ LANG=/^(id|en|es|pt)$/.test(lang)?lang:'id';
+ try{localStorage.setItem(LANG_KEY,LANG);}catch(e){}
+ document.documentElement.lang=LANG;
+ document.querySelectorAll('[data-i18n]').forEach(function(el){var id=el.getAttribute('data-i18n');el.textContent=trText(id);});
+ var walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),nodes=[],n;
+ while((n=walker.nextNode())){if(n.parentElement&&n.parentElement.closest('.lang-options'))continue;var raw=n.nodeValue.trim();if(raw){var translated=trText(raw);if(translated!==raw)n.nodeValue=n.nodeValue.replace(raw,translated);}}
+ document.querySelectorAll('.lang-option').forEach(function(b){var active=b.dataset.lang===LANG;b.classList.toggle('active',active);b.setAttribute('aria-pressed',active?'true':'false');});
+ if(typeof buildFeats==='function')buildFeats();
+ if(typeof readInfo==='function')readInfo();
+ if(typeof refresh==='function')refresh();
+}
+window.applyLanguage=applyLanguage;
+document.querySelectorAll('.lang-option').forEach(function(b){b.addEventListener('click',function(){applyLanguage(b.dataset.lang);if(window.toast)toast(({id:'Bahasa diubah',en:'Language changed',es:'Idioma cambiado',pt:'Idioma alterado'})[LANG],'s');});});
+try{LANG=localStorage.getItem(LANG_KEY)||'id';}catch(e){LANG='id';}
+
 /* device info (real-time) */
 var MODELS={
  '375x667x2':['iPhone SE / 8','2–4 GB'],'414x736x3':['iPhone 8 Plus','3 GB'],
@@ -606,12 +666,12 @@ function detect(){
     lang:navigator.language,tz:Intl.DateTimeFormat().resolvedOptions().timeZone||'-'};
 }
 function rows(){
-  var c=navigator.connection,online=navigator.onLine?('Online'+(c&&c.effectiveType?' · '+c.effectiveType.toUpperCase():'')):'Offline';
+  var c=navigator.connection,online=navigator.onLine?(trText('Online')+(c&&c.effectiveType?' · '+c.effectiveType.toUpperCase():'')) :trText('Offline');
   var mem=performance&&performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576)+' MB':'–';
-  var o=(innerWidth>innerHeight)?'Lanskap':'Potret';
-  var R=[['Perangkat',info.name],['Sistem',info.os],['RAM',info.ram],['Prosesor',info.cpu],['Layar',info.res],['Resolusi asli',info.px],
-    ['Refresh rate',fps?'~'+(fps>90?120:fps>45?60:fps)+' Hz':'–'],['Orientasi',o],['Jaringan',online],['Baterai',bat?Math.round(bat.level*100)+'%'+(bat.charging?' · mengisi':''):'Tidak tersedia'],
-    ['Memori JS',mem],['Bahasa',info.lang],['Zona waktu',info.tz]];
+  var o=trText((innerWidth>innerHeight)?'Lanskap':'Potret');
+  var R=[[trText('Perangkat'),info.name],[trText('Sistem'),info.os],[trText('RAM'),info.ram],[trText('Prosesor'),info.cpu],[trText('Layar'),info.res],[trText('Resolusi asli'),info.px],
+    [trText('Refresh rate'),fps?'~'+(fps>90?120:fps>45?60:fps)+' Hz':'–'],[trText('Orientasi'),o],['Jaringan',online],['Baterai',bat?Math.round(bat.level*100)+'%'+(bat.charging?' · mengisi':''):'Tidak tersedia'],
+    [trText('Memori JS'),mem],[trText('Bahasa'),info.lang],[trText('Zona waktu'),info.tz]];
   return R;
 }
 function readInfo(){
@@ -632,7 +692,7 @@ var fc=0,ft=performance.now();
 (function tick(now){fc++;if(now-ft>=1000){fps=Math.round(fc*1000/(now-ft));fc=0;ft=now;}requestAnimationFrame(tick);})(ft);
 setInterval(function(){if(gi('pg-info').classList.contains('on'))readInfo();},1000);
 addEventListener('resize',function(){detect();});
-readInfo();buildFeats();
+readInfo();buildFeats();applyLanguage(LANG);
 })();
 </script>
 
