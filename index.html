@@ -537,8 +537,8 @@ function flip(f,v){
 function refresh(){
   var a=active(),nf=a.filter(function(f){return f.pg==='feat';}).length,np=a.length-nf;
   gi('cntFeat').textContent=nf+' '+trText('aktif');gi('cntPerf').textContent=np+' '+trText('aktif');
-  gi('dkA').textContent=a.length+' fitur aktif';
-  gi('dkB').textContent=sel?NAMES[sel]:'Pilih game dulu';
+  gi('dkA').textContent=a.length+' '+trText('fitur aktif');
+  gi('dkB').textContent=sel?NAMES[sel]:trText('Pilih game dulu');
   gi('dock').classList.toggle('on',a.length>0);
 }
 function pick(k){
