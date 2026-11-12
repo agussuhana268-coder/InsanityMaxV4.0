@@ -33,7 +33,7 @@ button{font-family:inherit;-webkit-appearance:none;appearance:none}
 /* splash */
 #sp{flex-direction:column;z-index:100;gap:0}
 .appico{width:84px;height:84px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(150deg,#ff3b47,#9a0a14 70%);box-shadow:0 14px 40px rgba(255,45,58,.35),inset 0 1px 0 rgba(255,255,255,.35)}
-.appico b{font-size:46px;font-weight:800;letter-spacing:-2px;color:#fff;line-height:1;transform:translateY(-1px)}
+.appico-mark{background:transparent;box-shadow:none!important;border-radius:0!important;padding:3px;overflow:visible}.appico-mark svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 8px 14px rgba(237,16,24,.22))}
 #sp .appico{animation:breath 2.4s ease-in-out infinite}
 @keyframes breath{50%{transform:scale(1.05);box-shadow:0 18px 56px rgba(255,45,58,.5),inset 0 1px 0 rgba(255,255,255,.35)}}
 .sp-t{margin-top:22px;font-size:22px;font-weight:700;letter-spacing:-.4px}
@@ -217,7 +217,7 @@ button{font-family:inherit;-webkit-appearance:none;appearance:none}
 
 <!-- splash -->
 <div id="sp" class="scr on">
-  <div class="appico"><b>M</b></div>
+  <div class="appico appico-mark"><svg viewBox="0 0 1000 520" role="img" aria-label="Insanity Max monogram"><polygon points="65,465 205,55 345,55 225,430" fill="#f4f4f4"/><polygon points="260,465 405,40 600,230 855,40 985,40 850,465 710,465 800,180 585,340 420,195 335,430" fill="#ed1018"/></svg></div>
   <div class="sp-t">Insanity Max</div>
   <div class="sp-s">MDZZXITERS</div>
   <div class="sp-bar"><div id="sp-fill"></div></div>
@@ -227,7 +227,7 @@ button{font-family:inherit;-webkit-appearance:none;appearance:none}
 <!-- login -->
 <div id="lg" class="scr">
   <div class="lg-w">
-    <div class="appico"><b>M</b></div>
+    <div class="appico appico-mark"><svg viewBox="0 0 1000 520" role="img" aria-label="Insanity Max monogram"><polygon points="65,465 205,55 345,55 225,430" fill="#f4f4f4"/><polygon points="260,465 405,40 600,230 855,40 985,40 850,465 710,465 800,180 585,340 420,195 335,430" fill="#ed1018"/></svg></div>
     <h1>Insanity Max</h1>
     <p>Masukkan key untuk masuk</p>
     <div class="sheet-card">
@@ -245,7 +245,7 @@ button{font-family:inherit;-webkit-appearance:none;appearance:none}
       <button class="btn-vfy" id="vfybtn" onclick="doLogin()"><span id="vfyt">Verify Key</span></button>
       <div id="fb" class="fb hidden"></div>
     </div>
-    <div class="lg-v">Versi 3.0</div>
+    <div class="lg-v">Versi 4.0</div>
   </div>
 </div>
 
