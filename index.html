@@ -683,7 +683,7 @@ function readInfo(){
   gi('lvBat').textContent=bat?Math.round(bat.level*100)+'%':'–';
   var n=new Date();
   gi('pClk').textContent=('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2);
-  gi('pDt').textContent=n.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long'});
+  gi('pDt').textContent=n.toLocaleDateString(({id:'id-ID',en:'en-US',es:'es-ES',pt:'pt-BR'})[LANG]||'id-ID',{weekday:'long',day:'numeric',month:'long'});
   gi('specNote').textContent=(isIP||isPad)&&!navigator.deviceMemory?'Spesifikasi tidak selalu akurat 100%. Status yang ditampilkan bisa saja meleset! Jangan jadikan acuan.':'';
 }
 detect();
