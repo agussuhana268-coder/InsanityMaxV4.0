@@ -683,7 +683,7 @@ function rows(){
   var mem=performance&&performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576)+' MB':'–';
   var o=trText((innerWidth>innerHeight)?'Lanskap':'Potret');
   var R=[[trText('Perangkat'),info.name],[trText('Sistem'),info.os],[trText('RAM'),info.ram],[trText('Prosesor'),info.cpu],[trText('Layar'),info.res],[trText('Resolusi asli'),info.px],
-    [trText('Refresh rate'),fps?'~'+(fps>90?120:fps>45?60:fps)+' Hz':'–'],[trText('Orientasi'),o],[trText('Jaringan'),online],[trText('Baterai'),bat?Math.round(bat.level*100)+'%'+(bat.charging?' · mengisi':''):'Tidak tersedia'],
+    [trText('Refresh rate'),fps?'~'+(fps>90?120:fps>45?60:fps)+' Hz':'–'],[trText('Orientasi'),o],[trText('Jaringan'),online],[trText('Baterai'),bat?Math.round(bat.level*100)+'%'+(bat.charging?' · '+trText('mengisi'):''):trText('Tidak tersedia')],
     [trText('Memori JS'),mem],[trText('Bahasa'),info.lang],[trText('Zona waktu'),info.tz]];
   return R;
 }
@@ -697,7 +697,7 @@ function readInfo(){
   var n=new Date();
   gi('pClk').textContent=('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2);
   gi('pDt').textContent=n.toLocaleDateString(({id:'id-ID',en:'en-US',es:'es-ES',pt:'pt-BR'})[LANG]||'id-ID',{weekday:'long',day:'numeric',month:'long'});
-  gi('specNote').textContent=(isIP||isPad)&&!navigator.deviceMemory?'Spesifikasi tidak selalu akurat 100%. Status yang ditampilkan bisa saja meleset! Jangan jadikan acuan.':'';
+  gi('specNote').textContent=(isIP||isPad)&&!navigator.deviceMemory?trText('Spesifikasi tidak selalu akurat 100%. Status yang ditampilkan bisa saja meleset! Jangan jadikan acuan.'):'';
 }
 detect();
 if(navigator.getBattery)navigator.getBattery().then(function(b){bat=b;}).catch(function(){});
