@@ -1215,7 +1215,6 @@ window.SFX=SFX;
 })();
 
 /* ── Constants ── */
-var VALID_KEY='MDZZ-XITERS-2026';
 var PKG_FF='com.garena.game.fof';
 var PKG_MX='com.garena.game.ffmax';
 var STEPS=['INITIALIZING SYSTEM...','LOADING BYPASS MODULE...','CONNECTING TO SERVER...','VERIFYING LICENSE...','PATCHING MEMORY...','LOADING FEATURES...','READY.'];
@@ -1304,32 +1303,6 @@ function toggleEye(){
 window.toggleEye=toggleEye;
 
 gi('kinp').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
-
-function doLogin(){
-  ensureAudio();SFX.click();
-  var raw=gi('kinp').value.trim().toUpperCase();
-  var fb=gi('fb'),btn=gi('vfybtn'),bt=gi('vfyt');
-  btn.disabled=true;bt.textContent='VERIFYING...';
-  fb.className='fb hidden';
-  setTimeout(function(){
-    if(raw===VALID_KEY){
-      SFX.ok();
-      fb.textContent='ACCESS GRANTED — WELCOME';
-      fb.className='fb ok';
-      toast('ACCESS GRANTED','s',1800);
-      setTimeout(function(){goTo('lg','mp');buildFeats();},1100);
-    }else{
-      SFX.fail();
-      fb.textContent='INVALID KEY — ACCESS DENIED';
-      fb.className='fb no';
-      gi('kinp').style.cssText='border-color:#e01818;box-shadow:0 0 0 3px rgba(224,24,24,.18)';
-      toast('WRONG KEY — TRY AGAIN','e');
-      setTimeout(function(){gi('kinp').style.cssText='';},1600);
-      btn.disabled=false;bt.textContent='VERIFY KEY';
-    }
-  },880);
-}
-window.doLogin=doLogin;
 
 /* ══ CATEGORY FILTER & FEATURE LIST ══ */
 window.filterCat=function(cat,btn){
