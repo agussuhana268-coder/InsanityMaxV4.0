@@ -735,7 +735,37 @@ readInfo();buildFeats();applyLanguage(LANG);
     return id;
   }
   function getPlatform(){
-    return /iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'insanitymax_ios' : 'insanitymax_web';
+    return /iPhone|iPad|iPod/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent)&&navigator.maxTouchPoints>1)
+      ? 'insanitymax_ios' : 'insanitymax_web';
+  }
+  function getDeviceMetadata(){
+    var ua=navigator.userAgent||'';
+    var apple=/iPhone|iPad|iPod/i.test(ua)||(/Macintosh/i.test(ua)&&navigator.maxTouchPoints>1);
+    var ipad=/iPad/i.test(ua)||(/Macintosh/i.test(ua)&&navigator.maxTouchPoints>1);
+    var android=/Android/i.test(ua);
+    var brand=apple?'Apple':(android?'Android':null);
+    var manufacturer=apple?'Apple':null;
+    var model=null,name=null;
+    if(apple){
+      var w=Math.min(screen.width||0,screen.height||0),h=Math.max(screen.width||0,screen.height||0),d=window.devicePixelRatio||1;
+      var map={
+        '375x667x2':'iPhone SE / iPhone 8','414x736x3':'iPhone 8 Plus',
+        '375x812x3':'iPhone X / XS / 11 Pro / 12 mini / 13 mini',
+        '414x896x2':'iPhone XR / 11','414x896x3':'iPhone XS Max / 11 Pro Max',
+        '390x844x3':'iPhone 12 / 13 / 14','428x926x3':'iPhone 12 / 13 Pro Max / 14 Plus',
+        '393x852x3':'iPhone 14 Pro / 15 / 15 Pro / 16',
+        '430x932x3':'iPhone 14 Pro Max / 15 Plus / 15 Pro Max / 16 Plus',
+        '402x874x3':'iPhone 16 Pro / 17 / 17 Pro','440x956x3':'iPhone 16 Pro Max / 17 Pro Max',
+        '420x912x3':'iPhone Air'
+      };
+      model=ipad?'iPad':(map[w+'x'+h+'x'+d]||'iPhone (model tidak tersedia)');
+      name=model;
+    }else if(android){
+      var match=ua.match(/;\s*([^;)]+?)\s+Build\//i)||ua.match(/Android[^;)]*;\s*([^;)]+)/i);
+      model=match?match[1].trim():'Android (model tidak tersedia)';name=model;
+    }else{model='Browser device';name=model;}
+    return {device_brand:brand,device_manufacturer:manufacturer,device_model:model,device_name:name,
+      device_codename:null,android_version:(ua.match(/Android\s+([\d.]+)/i)||[])[1]||null,sdk_int:null};
   }
   async function postApi(path, payload){
     var response = await fetch(API_BASE + path, {
@@ -755,11 +785,7 @@ readInfo();buildFeats();applyLanguage(LANG);
     return data;
   }
   function sessionPayload(session){
-    return {
-      key:session.key,
-      device_id:session.did,
-      platform:getPlatform()
-    };
+    return Object.assign({key:session.key,device_id:session.did,platform:getPlatform()},getDeviceMetadata());
   }
   function licenseErrorText(err){
     var code=String(err&&err.code||'').toLowerCase();
@@ -848,11 +874,7 @@ readInfo();buildFeats();applyLanguage(LANG);
     fb.className='fb hidden';
     var session={key:raw,did:getDeviceId()};
     try {
-      await postApi('/api/licenses/session',{
-        key:session.key,
-        device_id:session.did,
-        platform:getPlatform()
-      });
+      await postApi('/api/licenses/session',sessionPayload(session));
       localStorage.setItem(SESSION_KEY,JSON.stringify(session));
       startHeartbeat(session);
       if(typeof SFX!=='undefined') SFX.ok();
