@@ -611,7 +611,7 @@ function rows(){
   var o=(innerWidth>innerHeight)?'Lanskap':'Potret';
   var R=[['Perangkat',info.name],['Sistem',info.os],['RAM',info.ram],['Prosesor',info.cpu],['Layar',info.res],['Resolusi asli',info.px],
     ['Refresh rate',fps?'~'+(fps>90?120:fps>45?60:fps)+' Hz':'–'],['Orientasi',o],['Jaringan',online],['Baterai',bat?Math.round(bat.level*100)+'%'+(bat.charging?' · mengisi':''):'Tidak tersedia'],
-    ['Memori JS',mem],['Browser',info.browser],['Bahasa',info.lang],['Zona waktu',info.tz]];
+    ['Memori JS',mem],['Bahasa',info.lang],['Zona waktu',info.tz]];
   return R;
 }
 function readInfo(){
